@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Antariksa - Sistem Tata Surya | IPAS Kelas 4 SD</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Fredoka & Quicksand for fun child-friendly typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            dark: '#0B0E1B',
+                            card: '#161B33',
+                            accent: '#252B48',
+                            purple: '#6B21A8',
+                            gold: '#F59E0B',
+                            neonBlue: '#38BDF8',
+                            neonPink: '#F472B6'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-glow': 'pulseGlow 2s infinite alternate',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        pulseGlow: {
+                            '0%': { boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)' },
+                            '100%': { boxShadow: '0 0 25px rgba(245, 158, 11, 0.9)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #0B0E1B;
+            color: #F3F4F6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .font-fun {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        /* Glassmorphism styling for futuristic space UI */
+        .glass-card {
+            background: rgba(22, 27, 51, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1.25rem;
+        }
+
+        .glass-card-interactive {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .glass-card-interactive:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(245, 158, 11, 0.6);
+            box-shadow: 0 12px 30px -10px rgba(107, 33, 168, 0.5);
+        }
+
+        /* Custom starfield canvas background */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Planet Orbit animation container */
+        .orbit-ring {
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Hide scrollbars for slick look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom drag and drop styles */
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-target.hovered {
+            background-color: rgba(245, 158, 11, 0.25) !important;
+            border-color: #F59E0B !important;
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-yellow-400 selection:text-slate-900">
+
+    <!-- Background Stars Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 bg-space-dark/90 backdrop-blur-md border-b border-purple-500/30 px-3 py-2 sm:px-6 sm:py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            
+            <!-- Logo & Brand Title -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-yellow-400 to-purple-600 p-0.5 animate-pulse-glow flex items-center justify-center">
+                    <div class="w-full h-full bg-space-dark rounded-full flex items-center justify-center">
+                        <i class="fa-solid font-bold fa-user-astronaut text-xl text-yellow-400 animate-float"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-cyan-300">
+                        PETUALANGAN ANTARIKSA
+                    </h1>
+                    <p class="text-[10px] sm:text-xs text-purple-300 flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-graduation-cap text-yellow-400"></i> IPAS Kelas 4 SD (Fase B)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Utility Sound Toggle & Student Greeting -->
+            <div class="flex items-center gap-2">
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-full bg-space-accent hover:bg-purple-800 text-xs sm:text-sm border border-purple-400/40 text-yellow-300 font-bold transition flex items-center gap-1.5 shadow-md">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                    <span id="soundText" class="hidden sm:inline">Suara: ON</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation Buttons -->
+        <nav class="max-w-7xl mx-auto mt-2 overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1.5 sm:gap-2 pb-1 min-w-max justify-start md:justify-center">
+                
+                <button id="nav-home" onclick="switchTab('home')" class="nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-900 shadow-lg scale-105">
+                    <i class="fa-solid fa-house"></i> Beranda
+                </button>
+
+                <button id="nav-tujuan" onclick="switchTab('tujuan')" class="nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-space-accent/80 text-gray-300 hover:text-white hover:bg-purple-900/60">
+                    <i class="fa-solid fa-bullseye"></i> Tujuan
+                </button>
+
+                <button id="nav-materi" onclick="switchTab('materi')" class="nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-space-accent/80 text-gray-300 hover:text-white hover:bg-purple-900/60">
+                    <i class="fa-solid fa-planet-ringed"></i> Materi
+                </button>
+
+                <button id="nav-kuis" onclick="switchTab('kuis')" class="nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-space-accent/80 text-gray-300 hover:text-white hover:bg-purple-900/60">
+                    <i class="fa-solid fa-circle-question"></i> Kuis Interaktif
+                </button>
+
+                <button id="nav-dragdrop" onclick="switchTab('dragdrop')" class="nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-space-accent/80 text-gray-300 hover:text-white hover:bg-purple-900/60">
+                    <i class="fa-solid fa-puzzle-piece"></i> Drag & Drop
+                </button>
+
+                <button id="nav-tentang" onclick="switchTab('tentang')" class="nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-space-accent/80 text-gray-300 hover:text-white hover:bg-purple-900/60">
+                    <i class="fa-solid fa-id-card"></i> Tentang
+                </button>
+
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- SECTION 1: HOME (BERANDA) -->
+        <section id="section-home" class="tab-content block space-y-8 animate-fadeIn">
+            <!-- Hero Card -->
+            <div class="glass-card p-6 sm:p-10 relative overflow-hidden border-2 border-yellow-500/40">
+                <div class="absolute -right-10 -bottom-10 opacity-20 pointer-events-none">
+                    <i class="fa-solid fa-space-shuttle text-[220px] text-yellow-400"></i>
+                </div>
+                
+                <div class="max-w-2xl space-y-4 relative z-10">
+                    <div class="inline-flex items-center gap-2 bg-yellow-400/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-bold border border-yellow-400/40">
+                        <i class="fa-solid fa-rocket animate-bounce"></i> Halo Kapten Antariksa Cilik!
+                    </div>
+                    <h2 class="text-3xl sm:text-5xl font-extrabold text-white leading-tight">
+                        Jelajahi Rahasia <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-300">Tata Surya Kita!</span>
+                    </h2>
+                    <p class="text-sm sm:text-base text-gray-200 leading-relaxed font-medium">
+                        Tahukah kamu bahwa Matahari dikelilingi oleh 8 planet hebat, bulan, dan jutaan asteroid? Mari bersiap memakai helm astronotmu dan memulai petualangan seru melintasi galaksi!
+                    </p>
+                    
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="switchTab('materi')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-base shadow-lg hover:shadow-yellow-500/50 hover:scale-105 transition flex items-center gap-2">
+                            <i class="fa-solid fa-rocket"></i> Mulai Petualangan
+                        </button>
+                        <button onclick="switchTab('kuis')" class="px-6 py-3 rounded-2xl bg-purple-700 hover:bg-purple-600 text-white font-bold text-base border border-purple-400/50 hover:scale-105 transition flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-yellow-400"></i> Uji Kemampuan (Kuis)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Orbit Quick View Banner -->
+            <div class="glass-card p-6 text-center space-y-4">
+                <h3 class="text-xl sm:text-2xl font-bold text-yellow-300 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-sun text-yellow-400 animate-spin-slow"></i> Peta Ringkas Anggota Tata Surya
+                </h3>
+                <p class="text-xs sm:text-sm text-purple-200">Klik salah satu planet di bawah ini untuk menuju materi belajarnya!</p>
+
+                <!-- Responsive Planet Quick Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2 pt-2">
+                    <!-- Sun -->
+                    <button onclick="openPlanetDetail('sun')" class="p-3 glass-card-interactive bg-amber-500/20 border-amber-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/50 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-sun text-2xl text-slate-900"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-yellow-300">Matahari</span>
+                    </button>
+                    <!-- Mercury -->
+                    <button onclick="openPlanetDetail('mercury')" class="p-3 glass-card-interactive bg-slate-500/20 border-slate-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-slate-400 flex items-center justify-center text-slate-950 font-bold group-hover:scale-110 transition">
+                            <i class="fa-solid fa-circle text-xl text-slate-300"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-gray-200">Merkurius</span>
+                    </button>
+                    <!-- Venus -->
+                    <button onclick="openPlanetDetail('venus')" class="p-3 glass-card-interactive bg-amber-600/20 border-amber-500/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-amber-300 flex items-center justify-center text-amber-900 font-bold group-hover:scale-110 transition">
+                            <i class="fa-solid fa-globe text-xl text-amber-700"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-amber-200">Venus</span>
+                    </button>
+                    <!-- Bumi -->
+                    <button onclick="openPlanetDetail('earth')" class="p-3 glass-card-interactive bg-blue-600/20 border-blue-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold group-hover:scale-110 transition">
+                            <i class="fa-solid fa-earth-asia text-xl text-emerald-300"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-blue-300">Bumi</span>
+                    </button>
+                    <!-- Mars -->
+                    <button onclick="openPlanetDetail('mars')" class="p-3 glass-card-interactive bg-red-600/20 border-red-500/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center text-white group-hover:scale-110 transition">
+                            <i class="fa-solid fa-circle text-xl text-red-200"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-red-300">Mars</span>
+                    </button>
+                    <!-- Yupiter -->
+                    <button onclick="openPlanetDetail('jupiter')" class="p-3 glass-card-interactive bg-orange-600/20 border-orange-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-orange-400 flex items-center justify-center text-slate-900 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-bowling-ball text-xl text-orange-800"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-orange-300">Yupiter</span>
+                    </button>
+                    <!-- Saturnus -->
+                    <button onclick="openPlanetDetail('saturn')" class="p-3 glass-card-interactive bg-yellow-600/20 border-yellow-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-slate-900 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-ring text-xl text-amber-900"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-yellow-300">Saturnus</span>
+                    </button>
+                    <!-- Uranus -->
+                    <button onclick="openPlanetDetail('uranus')" class="p-3 glass-card-interactive bg-cyan-600/20 border-cyan-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-cyan-400 flex items-center justify-center text-slate-900 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-snowflake text-xl text-cyan-900"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-cyan-300">Uranus</span>
+                    </button>
+                    <!-- Neptunus -->
+                    <button onclick="openPlanetDetail('neptune')" class="p-3 glass-card-interactive bg-indigo-600/20 border-indigo-400/40 rounded-xl flex flex-col items-center justify-center text-center group">
+                        <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white group-hover:scale-110 transition">
+                            <i class="fa-solid fa-wind text-xl text-cyan-200"></i>
+                        </div>
+                        <span class="mt-2 text-xs font-bold text-indigo-300">Neptunus</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Highlights Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-card p-5 border-l-4 border-yellow-400 space-y-2">
+                    <div class="text-yellow-400 text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-book-open-reader"></i> Materi Interaktif
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-300">Dilengkapi gambar menarik, suara pembaca narasi, dan uraian materi yang mudah dipahami anak SD Kelas 4.</p>
+                </div>
+                <div class="glass-card p-5 border-l-4 border-pink-400 space-y-2">
+                    <div class="text-pink-400 text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad"></i> Game Drag & Drop
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-300">Aktivitas seru mencocokkan planet berdasarkan ciri unik dan urutannya dari Matahari.</p>
+                </div>
+                <div class="glass-card p-5 border-l-4 border-cyan-400 space-y-2">
+                    <div class="text-cyan-400 text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-star"></i> Kuis Berhadiah Bintang
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-300">Uji pengetahuanmu dengan kuis interaktif berumpan balik langsung dan skor nilai bintang.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TUJUAN PEMBELAJARAN -->
+        <section id="section-tujuan" class="tab-content hidden space-y-6 animate-fadeIn">
+            <div class="glass-card p-6 sm:p-8 space-y-6">
+                <div class="border-b border-purple-500/30 pb-4">
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-yellow-400 flex items-center gap-3">
+                        <i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran (Fase B - Kelas 4)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-purple-200 mt-1">Capaian Pembelajaran IPAS (Ilmu Pengetahuan Alam dan Sosial)</p>
+                </div>
+
+                <p class="text-sm sm:text-base text-gray-200 leading-relaxed font-medium">
+                    Setelah melakukan petualangan belajar di media ini, siswa diharapkan mampu mencapai indikator pembelajaran berikut:
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Objective Card 1 -->
+                    <div class="glass-card p-5 bg-purple-900/20 border border-purple-500/30 flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-xl bg-yellow-400 text-slate-900 font-bold flex items-center justify-center shrink-0 text-xl shadow-lg">
+                            1
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-yellow-300">Pusat & Anggota Tata Surya</h3>
+                            <p class="text-xs sm:text-sm text-gray-200 mt-1">Mengidentifikasi Matahari sebagai pusat tata syurya dan 8 planet utama yang mengelilinginya.</p>
+                        </div>
+                    </div>
+
+                    <!-- Objective Card 2 -->
+                    <div class="glass-card p-5 bg-purple-900/20 border border-purple-500/30 flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-xl bg-pink-400 text-slate-900 font-bold flex items-center justify-center shrink-0 text-xl shadow-lg">
+                            2
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-pink-300">Urutan Planet</h3>
+                            <p class="text-xs sm:text-sm text-gray-200 mt-1">Mengurutkan nama-nama planet berdasarkan jaraknya dari Matahari secara tepat.</p>
+                        </div>
+                    </div>
+
+                    <!-- Objective Card 3 -->
+                    <div class="glass-card p-5 bg-purple-900/20 border border-purple-500/30 flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-400 text-slate-900 font-bold flex items-center justify-center shrink-0 text-xl shadow-lg">
+                            3
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-cyan-300">Karakteristik Planet</h3>
+                            <p class="text-xs sm:text-sm text-gray-200 mt-1">Mendeskripsikan ciri-ciri khusus dan keunikan setiap planet (seperti planet terbesar, terpanas, atau planet bercincin).</p>
+                        </div>
+                    </div>
+
+                    <!-- Objective Card 4 -->
+                    <div class="glass-card p-5 bg-purple-900/20 border border-purple-500/30 flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-400 text-slate-900 font-bold flex items-center justify-center shrink-0 text-xl shadow-lg">
+                            4
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-emerald-300">Benda Langit Lainnya</h3>
+                            <p class="text-xs sm:text-sm text-gray-200 mt-1">Mengenal benda antariksa lain seperti satelit alami (Bulan), asteroid, meteor, dan komet.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Self-Checklist interactive element -->
+                <div class="p-4 rounded-xl bg-space-accent/60 border border-yellow-500/30 space-y-3">
+                    <h4 class="text-base font-bold text-yellow-300 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> Target Belajarku Hari Ini:
+                    </h4>
+                    <div class="space-y-2 text-xs sm:text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-yellow-200">
+                            <input type="checkbox" class="w-4 h-4 accent-yellow-400 rounded"> Saya sudah tahu planet tempat kita tinggal (Bumi).
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-yellow-200">
+                            <input type="checkbox" class="w-4 h-4 accent-yellow-400 rounded"> Saya tahu planet terdekat dan planet terjauh dari Matahari.
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-yellow-200">
+                            <input type="checkbox" class="w-4 h-4 accent-yellow-400 rounded"> Saya dapat menyelesaikan Kuis & Permainan Drag-Drop.
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MATERI PEMBELAJARAN -->
+        <section id="section-materi" class="tab-content hidden space-y-6 animate-fadeIn">
+            <!-- Header Section -->
+            <div class="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-space-awesome"></i> Ensiklopedia Antariksa
+                    </h2>
+                    <p class="text-xs sm:text-sm text-purple-200">Pilih anggota Tata Surya di bawah untuk membaca & mendengarkan penjelasan lengkap!</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="readAloudCurrentMateri()" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md hover:scale-105 transition flex items-center gap-2">
+                        <i class="fa-solid fa-volume-high"></i> Dengarkan Suara Narasi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Planet selector Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                <button onclick="openPlanetDetail('sun')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-amber-500 text-slate-950 shadow-md">☀️ Matahari</button>
+                <button onclick="openPlanetDetail('mercury')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">1. Merkurius</button>
+                <button onclick="openPlanetDetail('venus')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">2. Venus</button>
+                <button onclick="openPlanetDetail('earth')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">3. Bumi</button>
+                <button onclick="openPlanetDetail('mars')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">4. Mars</button>
+                <button onclick="openPlanetDetail('jupiter')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">5. Yupiter</button>
+                <button onclick="openPlanetDetail('saturn')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">6. Saturnus</button>
+                <button onclick="openPlanetDetail('uranus')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">7. Uranus</button>
+                <button onclick="openPlanetDetail('neptune')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">8. Neptunus</button>
+                <button onclick="openPlanetDetail('others')" class="materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800">☄️ Benda Langit Lain</button>
+            </div>
+
+            <!-- Dynamic Planet Display Card -->
+            <div id="materiDisplayArea" class="glass-card p-6 sm:p-8 space-y-6">
+                <!-- Javascript will inject planet data here -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: KUIS INTERAKTIF -->
+        <section id="section-kuis" class="tab-content hidden space-y-6 animate-fadeIn">
+            
+            <div class="glass-card p-6 sm:p-8">
+                
+                <!-- Quiz Intro State -->
+                <div id="quizIntroState" class="text-center space-y-6 max-w-xl mx-auto py-6">
+                    <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-yellow-400 to-purple-600 flex items-center justify-center text-4xl text-slate-900 shadow-xl animate-bounce-slow">
+                        <i class="fa-solid fa-trophy text-yellow-300"></i>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-yellow-300">Uji Petualangan Antariksa</h2>
+                    <p class="text-sm text-gray-200">
+                        Jawab 5 pertanyaan seru tentang Tata Surya. Dapatkan bintang emas untuk setiap jawaban benar!
+                    </p>
+                    <button onclick="startQuiz()" class="px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 rounded-2xl font-extrabold text-lg shadow-xl hover:scale-105 transition">
+                        <i class="fa-solid fa-play"></i> Mulai Kuis Sekarang
+                    </button>
+                </div>
+
+                <!-- Active Quiz State -->
+                <div id="quizActiveState" class="hidden space-y-6">
+                    
+                    <!-- Progress Bar & Score Tracker -->
+                    <div class="flex items-center justify-between border-b border-purple-500/30 pb-4">
+                        <div>
+                            <span id="quizQuestionNum" class="text-xs font-bold uppercase tracking-wider text-purple-300">Soal 1 dari 5</span>
+                            <h3 id="quizCategory" class="text-lg font-bold text-yellow-400">Pengetahuan Tata Surya</h3>
+                        </div>
+                        <div class="flex items-center gap-2 bg-space-dark px-4 py-2 rounded-xl border border-yellow-500/40">
+                            <i class="fa-solid fa-star text-yellow-400 text-lg"></i>
+                            <span id="quizScoreText" class="text-lg font-extrabold text-white">Skor: 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Container -->
+                    <div class="space-y-4">
+                        <h4 id="quizQuestionText" class="text-xl sm:text-2xl font-bold text-white leading-snug">
+                            Loading pertanyaan...
+                        </h4>
+
+                        <!-- Answer Options Grid -->
+                        <div id="quizOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Immediate Feedback Modal/Banner -->
+                    <div id="quizFeedbackBox" class="hidden p-4 rounded-xl border space-y-2">
+                        <div id="quizFeedbackTitle" class="font-extrabold text-lg flex items-center gap-2"></div>
+                        <p id="quizFeedbackDesc" class="text-xs sm:text-sm text-gray-200"></p>
+                        <button id="quizNextBtn" onclick="nextQuestion()" class="mt-2 px-5 py-2 bg-yellow-400 text-slate-900 font-bold rounded-xl text-sm hover:bg-yellow-300">
+                            Lanjut ke Soal Berikutnya <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Quiz Results State -->
+                <div id="quizResultState" class="hidden text-center space-y-6 py-6 max-w-xl mx-auto">
+                    <div id="quizResultBadge" class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-yellow-300 via-amber-500 to-purple-600 flex items-center justify-center text-5xl shadow-2xl">
+                        🏆
+                    </div>
+                    
+                    <h2 class="text-3xl font-extrabold text-yellow-300">Petualangan Selesai!</h2>
+                    
+                    <div class="bg-space-dark/80 p-6 rounded-2xl border border-purple-500/40 space-y-2">
+                        <p class="text-sm text-purple-200">Hasil Akhir Kamu:</p>
+                        <div id="finalScoreDisplay" class="text-4xl font-extrabold text-yellow-400">Skor: 100 / 100</div>
+                        <p id="finalFeedbackMessage" class="text-sm font-medium text-gray-200 pt-2"></p>
+                    </div>
+
+                    <div class="flex justify-center gap-3">
+                        <button onclick="startQuiz()" class="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold rounded-xl text-sm hover:scale-105 transition">
+                            <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+                        </button>
+                        <button onclick="switchTab('dragdrop')" class="px-6 py-3 bg-purple-700 text-white font-bold rounded-xl text-sm hover:bg-purple-600 transition">
+                            Mainkan Drag & Drop <i class="fa-solid fa-puzzle-piece"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- SECTION 5: DRAG AND DROP GAME -->
+        <section id="section-dragdrop" class="tab-content hidden space-y-6 animate-fadeIn">
+            
+            <div class="glass-card p-6 sm:p-8 space-y-6">
+                
+                <div class="border-b border-purple-500/30 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-yellow-400 flex items-center gap-2">
+                            <i class="fa-solid fa-puzzle-piece"></i> Game Cocokkan Ciri Planet
+                        </h2>
+                        <p class="text-xs sm:text-sm text-purple-200">Tarik nama planet atau klik opsi untuk mencocokkan dengan deskripsinya yang tepat!</p>
+                    </div>
+                    <button onclick="resetDragDropGame()" class="px-4 py-2 bg-space-accent hover:bg-purple-800 text-yellow-300 border border-yellow-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset Game
+                    </button>
+                </div>
+
+                <!-- Draggable Planet Names Container -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-300 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-pointer"></i> Pilihan Nama Planet (Tarik ke Kotak yang Sesuai):
+                    </h3>
+                    <div id="draggablePlanetPool" class="flex flex-wrap gap-2 p-4 bg-space-dark/80 rounded-2xl border border-purple-500/30 min-h-[70px]">
+                        <!-- Injected by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Drop Targets Grid -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-yellow-400"></i> Tempatkan Planet di Kotak Deskripsi Berikuto:
+                    </h3>
+
+                    <div id="dropTargetsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Drag Drop Win Modal/Banner -->
+                <div id="dragDropSuccessBanner" class="hidden p-6 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl border-2 border-emerald-300 text-center space-y-3 animate-bounce-slow">
+                    <div class="text-4xl">🎉 🚀 🌟</div>
+                    <h3 class="text-2xl font-extrabold text-white">Luar Biasa! Semua Planet Terpasang Tepat!</h3>
+                    <p class="text-sm text-emerald-100">Kamu telah membuktikan dirimu sebagai Kapten Antariksa sejati!</p>
+                    <button onclick="resetDragDropGame()" class="px-6 py-2.5 bg-yellow-400 text-slate-900 font-extrabold rounded-xl text-sm hover:bg-yellow-300 transition">
+                        Mainkan Lagi
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- SECTION 6: TENTANG PENGEMBANG -->
+        <section id="section-tentang" class="tab-content hidden space-y-6 animate-fadeIn">
+            
+            <div class="glass-card p-6 sm:p-10 border-2 border-purple-500/40">
+                
+                <div class="max-w-3xl mx-auto space-y-8">
+                    
+                    <!-- Developer Profile Header -->
+                    <div class="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left border-b border-purple-500/30 pb-8">
+                        
+                        <div class="relative">
+                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-1 shadow-2xl animate-pulse-glow">
+                                <div class="w-full h-full bg-space-dark rounded-full flex items-center justify-center overflow-hidden">
+                                    <i class="fa-solid fa-user-graduate text-5xl sm:text-6xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <span class="absolute bottom-1 right-1 bg-emerald-500 text-slate-950 font-bold p-1.5 rounded-full text-xs shadow-lg" title="Pengembang Aktif">
+                                <i class="fa-solid fa-check"></i>
+                            </span>
+                        </div>
+
+                        <div class="space-y-2">
+                            <span class="px-3 py-1 bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 rounded-full text-xs font-bold">
+                                Pengembang Media Pembelajaran
+                            </span>
+                            <h2 class="text-2xl sm:text-4xl font-extrabold text-white">
+                                Zivarevie Hetzibah Suhandi
+                            </h2>
+                            <p class="text-sm sm:text-base text-purple-200 font-medium">
+                                Guru SD / Pendidik Generasi Digital Indonesia
+                            </p>
+                            <p class="text-xs sm:text-sm text-gray-300 max-w-xl">
+                                Berkomitmen menciptakan media pembelajaran interaktif berbasis web yang menyenangkan, ramah anak, dan bermakna untuk mendukung Implementasi Kurikulum Merdeka.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Metadata Media Details -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <div class="glass-card p-4 bg-purple-900/30 border border-purple-400/30 space-y-2">
+                            <div class="text-xs text-purple-300 font-bold uppercase tracking-wider">Mata Pelajaran</div>
+                            <div class="text-base font-bold text-yellow-300 flex items-center gap-2">
+                                <i class="fa-solid fa-atom"></i> IPAS (Fase B / Kelas 4 SD)
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 bg-purple-900/30 border border-purple-400/30 space-y-2">
+                            <div class="text-xs text-purple-300 font-bold uppercase tracking-wider">Materi Pokok</div>
+                            <div class="text-base font-bold text-cyan-300 flex items-center gap-2">
+                                <i class="fa-solid fa-earth-americas"></i> Sistem Tata Surya
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 bg-purple-900/30 border border-purple-400/30 space-y-2">
+                            <div class="text-xs text-purple-300 font-bold uppercase tracking-wider">Teknologi Pembelajaran</div>
+                            <div class="text-base font-bold text-pink-300 flex items-center gap-2">
+                                <i class="fa-solid fa-code"></i> HTML5, Tailwind CSS, JS (SPA)
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 bg-purple-900/30 border border-purple-400/30 space-y-2">
+                            <div class="text-xs text-purple-300 font-bold uppercase tracking-wider">Sasaran Pengguna</div>
+                            <div class="text-base font-bold text-emerald-300 flex items-center gap-2">
+                                <i class="fa-solid fa-children"></i> Siswa Sekolah Dasar Kelas 4
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Guide for Teachers -->
+                    <div class="p-5 rounded-2xl bg-space-accent/80 border border-yellow-500/40 space-y-3">
+                        <h3 class="text-lg font-bold text-yellow-300 flex items-center gap-2">
+                            <i class="fa-solid fa-chalkboard-user"></i> Petunjuk Penggunaan untuk Guru & Orang Tua
+                        </h3>
+                        <ul class="list-disc list-inside text-xs sm:text-sm text-gray-200 space-y-1.5 leading-relaxed">
+                            <li>Gunakan fitur <strong>Materi</strong> untuk menyajikan eksplorasi mandiri atau bimbingan kelompok.</li>
+                            <li>Fitur <strong>Narasi Suara</strong> membantu siswa dengan gaya belajar auditori.</li>
+                            <li>Gunakan <strong>Kuis Interaktif</strong> dan <strong>Game Drag & Drop</strong> sebagai evaluasi formatif yang menyenangkan tanpa menimbulkan kecemasan belajar pada anak.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-space-dark border-t border-purple-500/30 py-6 px-4 text-center text-xs text-purple-300/80 space-y-2">
+        <p class="font-bold text-purple-200">
+            Media Pembelajaran Interaktif IPAS Kelas 4 SD &bull; Sistem Tata Surya
+        </p>
+        <p>
+            Dirancang & Dikembangkan oleh <span class="text-yellow-400 font-bold">Zivarevie Hetzibah Suhandi</span>
+        </p>
+        <p class="text-[10px] text-gray-400">
+            &copy; 2026 Petualangan Antariksa SD. Hak Cipta Dilindungi.
+        </p>
+    </footer>
+
+    <!-- DYNAMIC PLANET MODAL / POPUP -->
+    <div id="planetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 border-2 border-yellow-400/50 relative animate-fadeIn">
+            
+            <button onclick="closePlanetModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-space-accent hover:bg-red-600 text-white font-bold flex items-center justify-center text-lg transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="modalPlanetContent">
+                <!-- Javascript dynamic injection -->
+            </div>
+            
+            <div class="flex justify-end pt-2">
+                <button onclick="closePlanetModal()" class="px-6 py-2.5 bg-yellow-400 text-slate-900 font-bold rounded-xl text-sm hover:bg-yellow-300">
+                    Tutup Modul
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Audio Toggle State
+        let soundEnabled = true;
+
+        // Web Audio API Synthesizer Sound Generator (No external file dependencies!)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(160, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'fanfare') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.12);
+                    osc.frequency.setValueAtTime(783.99, now + 0.24);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.36);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                text.innerText = 'Suara: ON';
+                playSound('click');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                text.innerText = 'Suara: OFF';
+            }
+        }
+
+        function switchTab(tabId) {
+            playSound('click');
+
+            // Hide all tab content sections
+            const sections = document.querySelectorAll('.tab-content');
+            sections.forEach(sec => sec.classList.add('hidden'));
+
+            // Show target section
+            const target = document.getElementById(`section-${tabId}`);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            // Update nav button highlights
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => {
+                btn.className = "nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-space-accent/80 text-gray-300 hover:text-white hover:bg-purple-900/60";
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "nav-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-900 shadow-lg scale-105";
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Stop speech synthesis if tab changes
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        const planetData = {
+            sun: {
+                name: "Matahari",
+                type: "Bintang Pusat Tata Surya",
+                color: "from-amber-400 to-yellow-500",
+                icon: "fa-sun",
+                badge: "Pusat Energi",
+                size: "Diameter: ~1.39 Juta km",
+                temp: "Suhu Permukaan: ~5.500°C",
+                desc: "Matahari adalah bola gas raksasa berpijar yang sangat panas. Matahari berada di pusat tata surya dan memiliki gaya gravitasi paling besar, sehingga mampu menarik 8 planet dan benda langit lainnya untuk mengelilinginya.",
+                funFact: "Matahari memancarkan cahaya dan panas yang menjadi sumber kehidupan paling utama bagi tumbuhan, hewan, dan manusia di Bumi!"
+            },
+            mercury: {
+                name: "Merkurius",
+                type: "Planet ke-1 dari Matahari",
+                color: "from-slate-400 to-gray-600",
+                icon: "fa-circle",
+                badge: "Planet Terdekat & Terkecil",
+                size: "Diameter: 4.879 km",
+                temp: "Suhu: -180°C sampai 430°C",
+                desc: "Merkurius adalah planet terkecil di tata surya dan yang paling dekat dengan Matahari. Karena tidak memiliki atmosfer tebal, suhunya sangat ekstrem: sangat panas di siang hari dan sangat dingin di malam hari.",
+                funFact: "Satu tahun di Merkurius hanya berlangsung selama 88 hari di Bumi!"
+            },
+            venus: {
+                name: "Venus",
+                type: "Planet ke-2 dari Matahari",
+                color: "from-amber-300 to-yellow-600",
+                icon: "fa-globe",
+                badge: "Planet Terpanas & Bintang Fajar",
+                size: "Diameter: 12.104 km",
+                temp: "Suhu Permukaan: ~465°C",
+                desc: "Venus sering terlihat bersinar terang di langit pagi atau sore hari sehingga disebut Bintang Kejora/Bintang Fajar. Atmosfernya sangat tebal terperangkap efek rumah kaca, menjadikannya planet terpanas di tata surya.",
+                funFact: "Venus berputar (rotasi) dengan arah terbalik dibandingkan mayoritas planet lain!"
+            },
+            earth: {
+                name: "Bumi",
+                type: "Planet ke-3 dari Matahari",
+                color: "from-blue-400 to-emerald-500",
+                icon: "fa-earth-asia",
+                badge: "Rumah Tempat Kita Tinggal",
+                size: "Diameter: 12.742 km",
+                temp: "Suhu Rata-rata: ~15°C",
+                desc: "Bumi adalah satu-satunya planet di tata surya yang diketahui memiliki kehidupan. Sekitar 70% permukaan Bumi terutup air cair. Bumi memiliki atmosfer beroksigen dan dilindungi oleh lapisan ozon.",
+                funFact: "Bumi memiliki 1 satelit alami yang indah bernama Bulan!"
+            },
+            mars: {
+                name: "Mars",
+                type: "Planet ke-4 dari Matahari",
+                color: "from-red-500 to-orange-600",
+                icon: "fa-circle",
+                badge: "Planet Merah",
+                size: "Diameter: 6.779 km",
+                temp: "Suhu Rata-rata: -60°C",
+                desc: "Mars disebut Planet Merah karena permukaannya kaya akan besi oksida (karat) yang berwarna kemerahan. Mars memiliki gunung berapi tertinggi di tata surya bernama Olympus Mons.",
+                funFact: "Para ilmuwan sering mengirimkan robot penjelajah (Rover) ke Mars untuk meneliti kemungkinan jejak air!"
+            },
+            jupiter: {
+                name: "Yupiter",
+                type: "Planet ke-5 dari Matahari",
+                color: "from-orange-400 to-amber-700",
+                icon: "fa-bowling-ball",
+                badge: "Planet Terbesar (Raksasa Gas)",
+                size: "Diameter: 139.820 km",
+                temp: "Suhu Atmosfer: -110°C",
+                desc: "Yupiter adalah planet terbesar di tata surya kita. Saking besarnya, semua planet lain bisa muat di dalam Yupiter! Memiliki badai raksasa berbentuk bintik merah besar (Great Red Spot).",
+                funFact: "Yupiter memiliki lebih dari 80 satelit alami (bulan)!"
+            },
+            saturn: {
+                name: "Saturnus",
+                type: "Planet ke-6 dari Matahari",
+                color: "from-yellow-400 to-amber-600",
+                icon: "fa-ring",
+                badge: "Planet Bercincin Indah",
+                size: "Diameter: 116.460 km",
+                temp: "Suhu Atmosfer: -140°C",
+                desc: "Saturnus terkenal dengan sistem cincin raksasa yang sangat spektakuler. Cincin ini terbuat dari bongkahan es, debu, dan batuan yang mengorbit Saturnus.",
+                funFact: "Meskipun sangat besar, Saturnus sebagian besar terdiri dari gas, sehingga permukaannya sangat ringan!"
+            },
+            uranus: {
+                name: "Uranus",
+                type: "Planet ke-7 dari Matahari",
+                color: "from-cyan-300 to-blue-500",
+                icon: "fa-snowflake",
+                badge: "Raksasa Es Biru-Hijau",
+                size: "Diameter: 50.724 km",
+                temp: "Suhu Permukaan: -224°C",
+                desc: "Uranus adalah planet raksasa es berwarna biru-hijau karena kandungan gas metana di atmosfernya. Keunikannya, Uranus berotasi dengan kemiringan ekstrem seolah-olah menggelinding di orbitnya.",
+                funFact: "Uranus adalah planet terdingin di seluruh Tata Surya!"
+            },
+            neptune: {
+                name: "Neptunus",
+                type: "Planet ke-8 dari Matahari",
+                color: "from-blue-600 to-indigo-800",
+                icon: "fa-wind",
+                badge: "Planet Terjauh & Berangin Kencang",
+                size: "Diameter: 49.244 km",
+                temp: "Suhu Rata-rata: -200°C",
+                desc: "Neptunus adalah planet paling luar di tata surya. Berwarna biru tua yang cantik dan terkenal memiliki badai angin paling kencang di antara semua planet.",
+                funFact: "Neptunus membutuhkan waktu sekitar 165 tahun di Bumi untuk mengelilingi Matahari satu kali!"
+            },
+            others: {
+                name: "Benda Langit Lainnya",
+                type: "Satelit, Asteroid, Komet & Meteoroid",
+                color: "from-purple-500 to-pink-600",
+                icon: "fa-meteor",
+                badge: "Pengelana Antariksa",
+                size: "Ukuran Bervariasi",
+                temp: "Suhu Dingin Antariksa",
+                desc: "Selain planet, ada benda langit lain di tata surya: \n1. **Satelit**: Benda langit yang mengelilingi planet (Contoh: Bulan pada Bumi).\n2. **Asteroid**: Batuan antariksa yang banyak berkumpul di sabuk asteroid antara Mars dan Yupiter.\n3. **Komet**: Bola es dan debu yang memiliki ekor bercahaya saat mendekati Matahari.\n4. **Meteoroid**: Batuan kecil melayang di ruang angkasa.",
+                funFact: "Meteor yang masuk ke atmosfer Bumi dan terbakar sering kita sebut bintang jatuh!"
+            }
+        };
+
+        let currentActivePlanetKey = 'sun';
+
+        function openPlanetDetail(planetKey) {
+            playSound('click');
+            currentActivePlanetKey = planetKey;
+            const data = planetData[planetKey];
+            if (!data) return;
+
+            // Update tab button styles in materi section
+            const tabBtns = document.querySelectorAll('.materi-tab-btn');
+            tabBtns.forEach(btn => {
+                btn.className = 'materi-tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-space-accent text-gray-300 hover:bg-purple-800';
+            });
+
+            const displayArea = document.getElementById('materiDisplayArea');
+            displayArea.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                    
+                    <!-- Visual Icon Badge -->
+                    <div class="flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-b ${data.color} text-slate-950 shadow-2xl space-y-3">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-950/20 backdrop-blur-md flex items-center justify-center animate-float">
+                            <i class="fa-solid ${data.icon} text-6xl sm:text-7xl text-white"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-slate-950 text-yellow-300 rounded-full text-xs font-extrabold uppercase tracking-wide">
+                            ${data.badge}
+                        </span>
+                    </div>
+
+                    <!-- Detailed Content -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="border-b border-purple-500/30 pb-3">
+                            <span class="text-xs font-bold text-purple-300 uppercase">${data.type}</span>
+                            <h3 class="text-3xl font-extrabold text-yellow-300">${data.name}</h3>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 text-xs font-bold">
+                            <span class="px-3 py-1.5 rounded-lg bg-space-dark border border-purple-500/30 text-cyan-300">
+                                <i class="fa-solid fa-ruler-horizontal"></i> ${data.size}
+                            </span>
+                            <span class="px-3 py-1.5 rounded-lg bg-space-dark border border-purple-500/30 text-pink-300">
+                                <i class="fa-solid fa-temperature-half"></i> ${data.temp}
+                            </span>
+                        </div>
+
+                        <p class="text-sm sm:text-base text-gray-100 leading-relaxed font-medium whitespace-pre-line">
+                            ${data.desc}
+                        </p>
+
+                        <div class="p-4 rounded-xl bg-yellow-400/10 border border-yellow-400/30 space-y-1">
+                            <h4 class="text-xs font-extrabold text-yellow-400 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-lightbulb"></i> Tahukah Kamu? (Tahukah Kamu (Fun Fact)):
+                            </h4>
+                            <p class="text-xs sm:text-sm text-yellow-200">
+                                ${data.funFact}
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        function readAloudCurrentMateri() {
+            if (!('speechSynthesis' in window)) {
+                alert("Maaf, peramban web kamu tidak mendukung fitur pembaca suara.");
+                return;
+            }
+
+            window.speechSynthesis.cancel(); // Stop current speech
+            playSound('click');
+
+            const data = planetData[currentActivePlanetKey];
+            if (!data) return;
+
+            const textToSpeech = `${data.name}. ${data.type}. ${data.desc} ${data.funFact}`;
+            const utterance = new SpeechSynthesisUtterance(textToSpeech);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.9; // Slightly slower speed for kids
+            utterance.pitch = 1.0;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* Modal Planet Triggering for Home quick view */
+        function openPlanetModal(planetKey) {
+            playSound('click');
+            const data = planetData[planetKey];
+            if (!data) return;
+
+            const modal = document.getElementById('planetModal');
+            const content = document.getElementById('modalPlanetContent');
+
+            content.innerHTML = `
+                <div class="text-center space-y-4">
+                    <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr ${data.color} flex items-center justify-center text-4xl text-white shadow-xl animate-float">
+                        <i class="fa-solid ${data.icon}"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-yellow-300">${data.name}</h3>
+                    <span class="inline-block px-3 py-1 bg-purple-900/80 text-purple-200 text-xs font-bold rounded-full">
+                        ${data.badge}
+                    </span>
+                    <p class="text-sm text-gray-200 text-left leading-relaxed">
+                        ${data.desc}
+                    </p>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closePlanetModal() {
+            playSound('click');
+            document.getElementById('planetModal').classList.add('hidden');
+        }
+
+        const quizQuestions = [
+            {
+                q: "Pusat dari Sistem Tata Surya kita yang memancarkan cahaya dan panas adalah...",
+                options: ["Bumi", "Matahari", "Bulan", "Yupiter"],
+                answer: 1,
+                explanation: "Matahari adalah bintang yang berada di pusat Tata Surya dan menyediakan energi untuk semua planet."
+            },
+            {
+                q: "Planet tempat tinggal manusia yang memiliki air dan atmosfer beroksigen adalah...",
+                options: ["Venus", "Mars", "Bumi", "Neptunus"],
+                answer: 2,
+                explanation: "Bumi adalah planet ke-3 yang ideal untuk kehidupan manusia, hewan, dan tumbuhan."
+            },
+            {
+                q: "Planet apakah yang terkenal memiliki sistem cincin raksasa yang sangat indah?",
+                options: ["Saturnus", "Merkurius", "Uranus", "Mars"],
+                answer: 0,
+                explanation: "Saturnus memiliki cincin spektakuler yang terbuat dari bongkahan es dan batuan."
+            },
+            {
+                q: "Manakah planet terdekat dari Matahari sekaligus merupakan planet terkecil?",
+                options: ["Yupiter", "Merkurius", "Neptunus", "Venus"],
+                answer: 1,
+                explanation: "Merkurius adalah planet nomor 1 yang paling dekat dengan Matahari."
+            },
+            {
+                q: "Planet manakah yang sering disebut sebagai 'Planet Merah'?",
+                options: ["Venus", "Bumi", "Mars", "Uranus"],
+                answer: 2,
+                explanation: "Mars berwarna kemerahan karena tanah dan batuannya mengandung banyak tanah besi oksida (karat)."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let currentQuizScore = 0;
+
+        function startQuiz() {
+            playSound('click');
+            currentQuizIndex = 0;
+            currentQuizScore = 0;
+
+            document.getElementById('quizIntroState').classList.add('hidden');
+            document.getElementById('quizResultState').classList.add('hidden');
+            document.getElementById('quizActiveState').classList.remove('hidden');
+
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quizQuestionNum').innerText = `Soal ${currentQuizIndex + 1} dari ${quizQuestions.length}`;
+            document.getElementById('quizScoreText').innerText = `Skor: ${currentQuizScore}`;
+            document.getElementById('quizQuestionText').innerText = q.q;
+
+            document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+            const grid = document.getElementById('quizOptionsGrid');
+            grid.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn p-4 glass-card-interactive bg-space-accent/80 hover:bg-purple-800 text-left rounded-xl font-bold text-sm sm:text-base border border-purple-500/30 transition flex items-center gap-3';
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-lg bg-purple-900 text-yellow-300 font-extrabold flex items-center justify-center shrink-0">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span>${opt}</span>
+                `;
+                btn.onclick = () => checkQuizAnswer(idx);
+                grid.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(selectedIdx) {
+            const q = quizQuestions[currentQuizIndex];
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            const feedbackTitle = document.getElementById('quizFeedbackTitle');
+            const feedbackDesc = document.getElementById('quizFeedbackDesc');
+
+            // Disable option buttons after picking
+            const optBtns = document.querySelectorAll('.quiz-opt-btn');
+            optBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedIdx === q.answer) {
+                playSound('correct');
+                currentQuizScore += 20;
+                document.getElementById('quizScoreText').innerText = `Skor: ${currentQuizScore}`;
+
+                feedbackBox.className = "p-4 rounded-xl border bg-emerald-950/80 border-emerald-500 text-emerald-100 space-y-2 animate-fadeIn";
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i> Jawaban Kamu Benar! (+20 Bintang)`;
+            } else {
+                playSound('wrong');
+                feedbackBox.className = "p-4 rounded-xl border bg-rose-950/80 border-rose-500 text-rose-100 space-y-2 animate-fadeIn";
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400 text-xl"></i> Kurang Tepat!`;
+            }
+
+            feedbackDesc.innerText = q.explanation;
+            feedbackBox.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            playSound('fanfare');
+            document.getElementById('quizActiveState').classList.add('hidden');
+            const resultState = document.getElementById('quizResultState');
+            resultState.classList.remove('hidden');
+
+            document.getElementById('finalScoreDisplay').innerText = `Skor: ${currentQuizScore} / 100`;
+
+            const msg = document.getElementById('finalFeedbackMessage');
+            if (currentQuizScore === 100) {
+                msg.innerText = "Sempurna! Kamu adalah Kapten Antariksa Sejati yang Sangat Cerdas! 🌟🌟🌟";
+            } else if (currentQuizScore >= 60) {
+                msg.innerText = "Hebat Sekali! Pengetahuan Antariksamu Sudah Sangat Bagus! 🚀";
+            } else {
+                msg.innerText = "Tetap Semangat! Mari baca kembali Materi Antariksa dan coba lagi ya! 💪";
+            }
+        }
+
+        const dragDropItems = [
+            { id: "p-earth", name: "Bumi", targetId: "target-earth", desc: "Planet tempat tinggal kita yang memiliki banyak air & kehidupan." },
+            { id: "p-jupiter", name: "Yupiter", targetId: "target-jupiter", desc: "Planet raksasa terbesar di Tata Surya." },
+            { id: "p-saturn", name: "Saturnus", targetId: "target-saturn", desc: "Planet dengan sistem cincin es yang indah." },
+            { id: "p-mars", name: "Mars", targetId: "target-mars", desc: "Planet berwarna merah karena tanahnya kaya besi oksida." }
+        ];
+
+        let matchedCount = 0;
+        let selectedPlanetForClick = null;
+
+        function initDragDropGame() {
+            matchedCount = 0;
+            selectedPlanetForClick = null;
+            document.getElementById('dragDropSuccessBanner').classList.add('hidden');
+
+            const pool = document.getElementById('draggablePlanetPool');
+            const targetContainer = document.getElementById('dropTargetsContainer');
+
+            pool.innerHTML = '';
+            targetContainer.innerHTML = '';
+
+            // Shuffle pool items
+            const shuffled = [...dragDropItems].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(item => {
+                const el = document.createElement('div');
+                el.id = item.id;
+                el.draggable = true;
+                el.className = "draggable-item px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-extrabold rounded-xl shadow-md border border-yellow-300 hover:scale-105 transition active:scale-95";
+                el.innerText = item.name;
+
+                // Drag events
+                el.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.id);
+                    playSound('click');
+                });
+
+                // Touch fallback click-select
+                el.addEventListener('click', () => {
+                    playSound('click');
+                    // Highlight selected
+                    document.querySelectorAll('.draggable-item').forEach(i => i.classList.remove('ring-4', 'ring-cyan-300'));
+                    el.classList.add('ring-4', 'ring-cyan-300');
+                    selectedPlanetForClick = item.id;
+                });
+
+                pool.appendChild(el);
+            });
+
+            // Target boxes
+            dragDropItems.forEach(item => {
+                const box = document.createElement('div');
+                box.className = "drop-target p-4 glass-card bg-purple-900/30 border-2 border-dashed border-purple-400/50 rounded-2xl flex flex-col justify-between gap-3 transition min-h-[120px]";
+                box.dataset.targetId = item.targetId;
+                box.dataset.correctPlanetId = item.id;
+
+                box.innerHTML = `
+                    <p class="text-xs sm:text-sm font-medium text-gray-200">
+                        <i class="fa-solid fa-quote-left text-yellow-400/60 mr-1"></i>${item.desc}
+                    </p>
+                    <div class="drop-slot p-2 rounded-xl bg-space-dark/80 border border-purple-500/30 text-center text-xs font-bold text-purple-300 italic">
+                        Geser / Klik nama planet ke sini
+                    </div>
+                `;
+
+                // Dragover & drop handlers
+                box.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    box.classList.add('hovered');
+                });
+
+                box.addEventListener('dragleave', () => {
+                    box.classList.remove('hovered');
+                });
+
+                box.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    box.classList.remove('hovered');
+                    const droppedId = e.dataTransfer.getData('text/plain');
+                    handleMatchAttempt(droppedId, box);
+                });
+
+                // Touch/click fallback target click
+                box.addEventListener('click', () => {
+                    if (selectedPlanetForClick) {
+                        handleMatchAttempt(selectedPlanetForClick, box);
+                    }
+                });
+
+                targetContainer.appendChild(box);
+            });
+        }
+
+        function handleMatchAttempt(planetElementId, targetBox) {
+            if (targetBox.dataset.matched === "true") return;
+
+            const correctId = targetBox.dataset.correctPlanetId;
+            if (planetElementId === correctId) {
+                playSound('correct');
+                targetBox.dataset.matched = "true";
+
+                const draggedEl = document.getElementById(planetElementId);
+                const slot = targetBox.querySelector('.drop-slot');
+
+                slot.className = "drop-slot p-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-sm text-center shadow-lg border border-emerald-300 animate-fadeIn flex items-center justify-center gap-2";
+                slot.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${draggedEl.innerText}`;
+
+                if (draggedEl && draggedEl.parentNode) {
+                    draggedEl.parentNode.removeChild(draggedEl);
+                }
+
+                selectedPlanetForClick = null;
+                matchedCount++;
+
+                if (matchedCount === dragDropItems.length) {
+                    playSound('fanfare');
+                    document.getElementById('dragDropSuccessBanner').classList.remove('hidden');
+                }
+            } else {
+                playSound('wrong');
+                targetBox.classList.add('border-red-500');
+                setTimeout(() => targetBox.classList.remove('border-red-500'), 800);
+            }
+        }
+
+        function resetDragDropGame() {
+            playSound('click');
+            initDragDropGame();
+        }
+
+        function initStarfield() {
+            const canvas = document.getElementById('starfield');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const stars = [];
+            const numStars = 120;
+
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 1.8 + 0.2,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.015 + 0.005
+                });
+            }
+
+            function animateStars() {
+                ctx.clearRect(0, 0, width, height);
+
+                stars.forEach(s => {
+                    s.alpha += s.speed;
+                    if (s.alpha > 1 || s.alpha < 0) {
+                        s.speed = -s.speed;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha)})`;
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animateStars);
+            }
+
+            animateStars();
+        }
+
+        window.onload = function() {
+            initStarfield();
+            openPlanetDetail('sun');
+            initDragDropGame();
+        };
+    </script>
+</body>
+</html>
